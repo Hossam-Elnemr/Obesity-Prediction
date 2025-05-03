@@ -1,0 +1,4 @@
+In the terminal of pycharm write this line:
+streamlit run .\application.py
+
+If you want to close the running session press CTRL + C
