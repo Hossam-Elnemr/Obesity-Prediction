@@ -1,0 +1,9 @@
+Hussein -> Logistic Regression (Done from scratch), Data Preprocessing (Done)
+Anas -> Data Preprocessing, KNN
+Remon -> SVM, Reporting (Comparing models)
+Zeyad -> SVM, EDA
+Rehab & Rawan -> Random Forest, streamlit
+Hossam -> EDA, streamlit
+
+
+Reporting -> Each task will be documented and reported by its members
