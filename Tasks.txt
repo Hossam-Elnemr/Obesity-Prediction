@@ -1,5 +1,5 @@
 Hussein -> Logistic Regression (Done from scratch), Data Preprocessing (Done)
-Anas -> Data Preprocessing, KNN
+Anas -> Data Preprocessing(Done), KNN
 Remon -> SVM, Reporting (Comparing models)
 Zeyad -> SVM, EDA
 Rehab & Rawan -> Random Forest, streamlit
