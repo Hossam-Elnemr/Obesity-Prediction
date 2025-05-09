@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 import math
+from sklearn.metrics import accuracy_score
 
 
 def sigmoid(z):
@@ -13,7 +14,7 @@ def compute_cost_logistic(X, y, w, b):
     for i in range(m):
         z_i = np.dot(X[i], w)+b
         y_pred = sigmoid(z_i)
-        cost += y[i]*np.log2(y_pred)+(1-y[i])*np.log2(1-y_pred)
+        cost += y[i]*np.log(y_pred)+(1-y[i])*np.log(1-y_pred)
 
     return -cost/m
 
@@ -32,7 +33,7 @@ def compute_gradient_logistic(X, y, w, b):
     return dj_dw/m, dj_db/m
 
 
-def gradient_descent(X,y , w_initial, b_initial, alpha, iterations):
+def gradient_descent(X, y, w_initial, b_initial, alpha, iterations):
     w = w_initial
     b = b_initial
     J_history = []
@@ -71,7 +72,7 @@ def one_vs_rest_train(X, y, classes, alpha=0.01, iterations=1000):
     
     return classifiers
 
-def one_vs_rest_predict(X, classifiers):
+def one_vs_rest_predict(X, y, classifiers):
     predictions = []
     m = X.shape[0]
     for i in range(m):
@@ -82,4 +83,5 @@ def one_vs_rest_predict(X, classifiers):
         # Choose the class with the highest probability
         predicted_class = max(class_probs, key=class_probs.get)
         predictions.append(predicted_class)
+    print(accuracy_score(y, predictions))
     return predictions
