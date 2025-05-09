@@ -3,7 +3,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import streamlit as st
 import sklearn as sk
-from SVM import SVM
+import SVM_Model
 from Logistic_regression_Model import gradient_descent, predict
 train_data = pd.read_csv('train_dataset.csv')
 test_data = pd.read_csv('test_dataset.csv')
