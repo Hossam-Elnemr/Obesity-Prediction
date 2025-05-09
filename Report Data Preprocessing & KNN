@@ -1,0 +1,12 @@
+Data Preprocessing
+- Handling Outliers: Outliers in numerical features are identified using the interquartile range (IQR) method.
+- Feature Scaling: Numerical features are standardized to zero mean and unit variance using StandardScaler.
+- Feature Engineering: The feature BMI is computed from Height and Weight and added to both training and testing datasets.
+- Categorical Encoding: Categorical columns are transformed into one-hot encoded columns and using the label encoding for the target cause the model and confusion matrix don't support the one hot encoding.
+
+KNN Model
+- Optimized hyperparameters taken by grid search - based on accuracy scores.
+- Model Evaluation: Model performance is evaluated using (Accuracy score, Classification report detailing precision, recall, F1-score and Confusion matrix visualized with a heatmap to illustrate true vs. predicted labels).
+
+
+
