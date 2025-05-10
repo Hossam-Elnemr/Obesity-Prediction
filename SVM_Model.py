@@ -33,3 +33,31 @@ def train_and_evaluate_svm(X_train, Y_train, X_test, Y_test, learning_rate=0.001
     print("\nClassification Report:")
     print(classification_report(Y_test, predictions, target_names=["Not Obese", "Obese"]))
     return weights, bias
+
+def train_multi_class_svm(X_train, Y_train, learning_rate=0.001, lambda_param=0.01, iterations=1000):
+    label_encoder = LabelEncoder()
+    Y_train_encoded = label_encoder.fit_transform(Y_train)
+    classes = label_encoder.classes_
+
+    classifiers = {}
+    for class_label in classes:
+        binary_labels = np.where(Y_train_encoded == label_encoder.transform([class_label])[0], 1, -1)
+        weights, bias = train_svm(X_train, binary_labels, learning_rate, lambda_param, iterations)
+        classifiers[class_label] = (weights, bias)
+
+    return classifiers, label_encoder
+
+def predict_multi_class_svm(X_test, classifiers, label_encoder):
+    class_confidences = {cls: predict_svm(X_test, weights, bias) for cls, (weights, bias) in classifiers.items()}
+    predictions = np.array([max(class_confidences, key=lambda k: class_confidences[k][i]) for i in range(X_test.shape[0])])
+    return label_encoder.transform(predictions)
+
+def predict_and_evaluate(X_test, Y_test, classifiers, label_encoder):
+    Y_pred = predict_multi_class_svm(X_test, classifiers, label_encoder)
+    Y_test_decoded = label_encoder.inverse_transform(Y_test)  # Ensure Y_test is properly decoded
+
+    accuracy = accuracy_score(Y_test_decoded, label_encoder.inverse_transform(Y_pred))
+    print(f"Multi-Class SVM Accuracy: {accuracy:.2f}\n")
+    print("Classification Report:")
+    print(classification_report(Y_test_decoded, label_encoder.inverse_transform(Y_pred), target_names=label_encoder.classes_))
+    return Y_pred
