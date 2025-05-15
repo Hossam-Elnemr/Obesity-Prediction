@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
 import math
-from sklearn.metrics import accuracy_score
+from sklearn.metrics import accuracy_score, classification_report
 
 
 def sigmoid(z):
@@ -83,5 +83,6 @@ def one_vs_rest_predict(X, y, classifiers):
         # Choose the class with the highest probability
         predicted_class = max(class_probs, key=class_probs.get)
         predictions.append(predicted_class)
-    print(accuracy_score(y, predictions))
+    print("Accuracy Score: {}".format(accuracy_score(y, predictions)))
+    print("Classification Report\n{}".format(classification_report(y, predictions)))
     return predictions
