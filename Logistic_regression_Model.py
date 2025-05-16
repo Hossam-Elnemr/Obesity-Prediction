@@ -1,7 +1,10 @@
 import pandas as pd
 import numpy as np
 import math
-from sklearn.metrics import accuracy_score, classification_report
+from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
+import matplotlib.pyplot as plt
+import seaborn as sns
+import joblib
 
 
 def sigmoid(z):
@@ -51,8 +54,10 @@ def gradient_descent(X, y, w_initial, b_initial, alpha, iterations):
 def one_vs_rest_train(X, y, classes, alpha=0.01, iterations=1000):
     classifiers = {}
     m, n = X.shape
+    encoder = joblib.load('label_encoder.pkl')
     for cls in classes:
-        print(f"\nTraining classifier for class: {cls}")
+        class_name = encoder.inverse_transform([cls])[0]
+        print(f"\nTraining classifier for class: {class_name}")
         # Convert y to binary: 1 if current class, 0 otherwise
         y_binary =[]
         for label in y:
@@ -83,6 +88,17 @@ def one_vs_rest_predict(X, y, classifiers):
         # Choose the class with the highest probability
         predicted_class = max(class_probs, key=class_probs.get)
         predictions.append(predicted_class)
+    encoder = joblib.load('label_encoder.pkl')
     print("Accuracy Score: {}".format(accuracy_score(y, predictions)))
-    print("Classification Report\n{}".format(classification_report(y, predictions)))
+    print("Classification Report\n{}".format(classification_report(y, predictions, target_names=encoder.classes_)))
     return predictions
+
+def confusion_Matrix(y_test, predictions):
+    encoder = joblib.load('label_encoder.pkl')
+    plt.figure(figsize=(8, 6))
+    cm = confusion_matrix(y_test, predictions)
+    sns.heatmap(cm, annot=True, fmt='d', xticklabels=encoder.classes_, yticklabels=encoder.classes_)
+    plt.title('Confusion Matrix')
+    plt.xlabel('Predicted')
+    plt.ylabel('True')
+    plt.show()
