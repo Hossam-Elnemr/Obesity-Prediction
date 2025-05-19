@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 
 st.set_page_config(
-    page_title='Salary Classifier',
+    page_title='Obesity Classifier',
     page_icon=':gem:',
     initial_sidebar_state='collapsed'  # Collapsed sidebar
 )
@@ -48,9 +48,9 @@ with st.sidebar:
     )
 
 if choose=='Home':
-       st.write('# Salary Classifier')
+       st.write('# Obesity Classifier')
        st.write('---')
-       st.subheader('Enter your details to classify your salary')
+       st.subheader('Enter your details to classify your Obesity')
        # User input
 #---------------------------------------------------------------------------------------------------------------------------------------------
 
