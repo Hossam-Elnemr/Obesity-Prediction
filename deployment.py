@@ -5,9 +5,42 @@ from streamlit_option_menu import option_menu
 import streamlit_lottie as st_lottie
 import joblib
 import numpy as np
+from sklearn.preprocessing import StandardScaler, LabelEncoder
 import PIL as Image
 import matplotlib.pyplot as plt
 import seaborn as sns
+import nbimporter
+# from application import scale_features, add_bmi_feature
+
+data = pd.read_csv('train_dataset.csv')
+    # Create a DataFrame
+df = pd.DataFrame(data)
+
+
+def get_column_types(df):
+    numerical_cols = ['age', 'Height', 'weight', 'FCVC', 'NCP', 'CH2O', 'FAF', 'THE', 'BMI']
+    categorical_cols = ['Gender', 'family_history_with_overweight', 'FAVC', 'CAEC', 'SMOKE', 'SCC', 'CALC', 'MTRANS']
+    return numerical_cols
+
+numerical_cols = get_column_types(df)
+
+def add_bmi_feature(df):
+    height_in_meters = df['Height'] / 100
+    epsilon = 1e-6
+    bmi = df['weight'] / ((height_in_meters ** 2) + epsilon)
+    df['BMI'] = bmi  # Add the BMI column
+    return df
+
+def scale_features(data, columns):
+    scaler = StandardScaler()
+    data_scaled = data.copy()
+    data[columns] = scaler.fit_transform(data[columns])
+    return data
+
+def encode_categorical(data, columns):
+    data_encoded = pd.get_dummies(data, columns=columns).astype(float)
+    return data_encoded
+# _________________________________________________________________________________
 
 st.set_page_config(
     page_title='Obesity Classifier',
@@ -27,7 +60,7 @@ def predict(age,Height,weight,FCVC,NCP, CH2O,FAF,THE,BMI,Gender_Female,Gender_Ma
               SMOKE_no, SMOKE_yes, SCC_no, SCC_yes, CALC_Always, CALC_Frequently,CALC_Sometimes,CALC_no, MTRANS_Automobile, MTRANS_Bike,
                 MTRANS_Motorbike ,MTRANS_Public_Transportation,MTRANS_Walking):
 
-    features = np.array([age,Height,weight,FCVC,NCP, CH2O,FAF,THE,BMI,Gender_Female,Gender_Male,family_history_with_overweight_no,
+    features = np.array([age,Height,weight,FCVC,NCP, CH2O,FAF,THE,BMI, Gender_Female,Gender_Male,family_history_with_overweight_no,
             family_history_with_overweight_yes,FAVC_no,FAVC_yes ,CAEC_Always,CAEC_Frequently, CAEC_Sometimes, CAEC_no,
               SMOKE_no, SMOKE_yes, SCC_no, SCC_yes, CALC_Always, CALC_Frequently,CALC_Sometimes,CALC_no, MTRANS_Automobile, MTRANS_Bike,
                 MTRANS_Motorbike ,MTRANS_Public_Transportation,MTRANS_Walking]).reshape(1, -1)
@@ -55,7 +88,6 @@ if choose=='Home':
 #---------------------------------------------------------------------------------------------------------------------------------------------
 
 st.title("Obesity Risk Prediction")
-# Numerical Inputs
 age = st.number_input("Enter your age:", min_value=0)
 Height = st.number_input("Enter your height (in meters):", min_value=0.0, format="%.2f")
 weight = st.number_input("Enter your weight (in kg):", min_value=0.0, format="%.2f")
@@ -114,21 +146,63 @@ MTRANS_Automobile = int(MTRANS == "Automobile")
 MTRANS_Public_Transportation = int(MTRANS == "Public_Transportation")
 
 
-# age,Height,weight,FCVC,NCP, CH2O,FAF,THE,BMI,Gender_Female,Gender_Male,family_history_with_overweight_no,
-            # family_history_with_overweight_yes,FAVC_no,FAVC_yes ,CAEC_Always,CAEC_Frequently, CAEC_Sometimes, CAEC_no,
-            #   SMOKE_no, SMOKE_yes, SCC_no, SCC_yes, CALC_Always, CALC_Frequently,CALC_no, MTRANS_Automobile, MTRANS_Bike,
-                # MTRANS_Motorbike ,MTRANS_Public_Transportation,MTRANS_Walking
-# Final input vector
-input_data = np.array([[age, Height, weight, FCVC, NCP, CH2O, FAF, THE, BMI,
-                        Gender_Female, Gender_Male, 
-                        family_history_with_overweight_no, family_history_with_overweight_yes,
-                        FAVC_no, FAVC_yes,
-                        CAEC_Always, CAEC_Frequently, CAEC_Sometimes, CAEC_no,
-                        SMOKE_no, SMOKE_yes,
-                        SCC_no, SCC_yes,
-                        CALC_Always, CALC_Frequently,CALC_Sometimes, CALC_no,
-                        MTRANS_Automobile, MTRANS_Bike, MTRANS_Motorbike,
-                        MTRANS_Public_Transportation, MTRANS_Walking]])
+# Pack all features in a dictionary in the exact order expected by your model:
+input_data = {
+    "age": age,
+    "Height": Height,
+    "weight": weight,
+    "FCVC": FCVC,
+    "NCP": NCP,
+    "CH2O": CH2O,
+    "FAF": FAF,
+    "THE": THE,
+    "BMI": BMI,
+    "Gender_Female": Gender_Female,
+    "Gender_Male": Gender_Male,
+    "family_history_with_overweight_no": family_history_with_overweight_no,
+    "family_history_with_overweight_yes": family_history_with_overweight_yes,
+    "FAVC_no": FAVC_no,
+    "FAVC_yes": FAVC_yes,
+    "CAEC_Always": CAEC_Always,
+    "CAEC_Frequently": CAEC_Frequently,
+    "CAEC_Sometimes": CAEC_Sometimes,
+    "CAEC_no": CAEC_no,
+    "SMOKE_no": SMOKE_no,
+    "SMOKE_yes": SMOKE_yes,
+    "SCC_no": SCC_no,
+    "SCC_yes": SCC_yes,
+    "CALC_Always": CALC_Always,
+    "CALC_Frequently": CALC_Frequently,
+    "CALC_Sometimes": CALC_Sometimes,
+    "CALC_no": CALC_no,
+    "MTRANS_Automobile": MTRANS_Automobile,
+    "MTRANS_Bike": MTRANS_Bike,
+    "MTRANS_Motorbike": MTRANS_Motorbike,
+    "MTRANS_Public_Transportation": MTRANS_Public_Transportation,
+    "MTRANS_Walking": MTRANS_Walking
+}
+
+# st.write("Raw input data:", input_data)
+# ---------------------------------------------------------------------------------
+# input_df_with_bmi = add_bmi_feature(input_df)
+
+# Get column types
+
+
+input_df = pd.DataFrame([input_data])
+# Scale numerical columns
+data_scaled = scale_features(input_df, numerical_cols)
+
+# Encode categorical columns
+# print(data_scaled.shape[1])
+# data_final = encode_categorical(data_scaled, categorical_cols)
+
+# print(categorical_cols)
+# print(data_final.shape[1])
+
+
+
+# print(input_data_with_bmi.shape[1])
 
 # st.write("User Input Vector:")
 # st.write(input_data)
@@ -141,26 +215,29 @@ input_data = np.array([[age, Height, weight, FCVC, NCP, CH2O, FAF, THE, BMI,
 
 # ['Insufficient_Weight' 'Normal_Weight' 'Obesity_Type_I' 'Obesity_Type_II'
 #  'Obesity_Type_III' 'Overweight_Level_I' 'Overweight_Level_II']
+encoder = joblib.load('label_encoder.pkl')
 
 if st.button("Predict", key="predict_button"):
-    sample_prediction = predict(*input_data[0])
+    sample_prediction = predict(*data_scaled.iloc[0].values)
     
-    if sample_prediction == 0:
-        st.warning("NObeyesdad: Insufficient_Weight")
-    elif sample_prediction == 1:
-        st.success("NObeyesdad: Normal_Weight")
-    elif sample_prediction == 2:
-        st.warning("NObeyesdad: Obesity_Type_I")
-    elif sample_prediction == 3:
-        st.warning("NObeyesdad: Obesity_Type_II")
-    elif sample_prediction == 4:
-        st.warning("NObeyesdad: Obesity_Type_III")
-    elif sample_prediction == 5:
-        st.warning("NObeyesdad: Overweight_Level_I")
-    elif sample_prediction == 6:
-        st.warning("NObeyesdad: Overweight_Level_II")
-    else:
-        st.error("Unknown prediction value.")
+    class_name = encoder.inverse_transform([sample_prediction])[0]
+    st.warning(f"NObeyesdad: {class_name}")
+
+    # if sample_prediction == 0:
+    # elif sample_prediction == 1:
+    #     st.warning(f"NObeyesdad: {class_name}")
+    # elif sample_prediction == 2:
+    #     st.warning(f"NObeyesdad: {class_name}")
+    # elif sample_prediction == 3:
+    #     st.warning(f"NObeyesdad: {class_name}")
+    # elif sample_prediction == 4:
+    #     st.warning(f"NObeyesdad: {class_name}")
+    # elif sample_prediction == 5:
+    #     st.warning(f"NObeyesdad: {class_name}")
+    # elif sample_prediction == 6:
+    #     st.warning(f"NObeyesdad: {class_name}")
+    # else:
+    #     st.error("Unknown prediction value.")
 
         
 
@@ -215,7 +292,5 @@ elif choose == 'Graphs':
     st.write("## Age Period Vs Working Hours Period Graph")
     st.image("output11.png")
     
-    data = pd.read_csv('Obesity-Prediction/train_dataset.csv')
-    # Create a DataFrame
-    df = pd.DataFrame(data)
+    
     
